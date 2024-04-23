@@ -1,40 +1,66 @@
-import pygame
-import random
+import tkinter as tk
 from brownian_motion import Molecule
-
-pygame.init()
-screen = pygame.display.set_mode((800, 600))
-clock = pygame.time.Clock()
+import math
+import random
 
 
-molecules = []
-for i in range(50):
-    x = random.randint(0, 800)
-    y = random.randint(0, 600)
-    size = random.randint(5, 15)
-    color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-    molecules.append(Molecule(x, y, size, color))
-
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    for molecule in molecules:
-        molecule.move()
+def check_collisions(molecules):
+    """
+    Function of checking collisions betwixt molecules
+    :param molecules:
+    :return:
+    """
 
     for i in range(len(molecules)):
         for j in range(i + 1, len(molecules)):
-            if molecules[i].check_collision(molecules[j]):
-                molecules[i].bounce(molecules[j])
+            dx = molecules[i].x - molecules[j].x
+            dy = molecules[i].y - molecules[j].y
+            distance = math.sqrt(dx ** 2 + dy ** 2)
 
-    screen.fill((255, 255, 255))
-    for molecule in molecules:
-        molecule.draw(screen)
+            if distance < molecules[i].size / 2 + molecules[j].size / 2:
+                molecules[i].bounce_from_molecule(molecules[j])
 
-    pygame.display.update()
 
-    clock.tick(60)
+def main():
+    canvas_width = 800
+    canvas_height = 400
+    canvas = tk.Canvas(width=canvas_width, height=canvas_height, bg='white')
 
-pygame.quit()
+    molecules = []
+
+    for i in range(40):
+        size = random.randint(5, 15)
+        color = '#{:06x}'.format(random.randint(0, 256**3 - 1))
+        speed = random.randint(1, 5)
+        molecule = Molecule(canvas, size, color, speed)
+
+        while any(math.sqrt((molecule.x - other.x) ** 2 + (molecule.y - other.y) ** 2) <
+                  molecule.size / 2 + other.size / 2 for other in molecules):
+            molecule.x = random.random() * canvas_width
+            molecule.y = random.random() * canvas_height
+
+        molecules.append(molecule)
+
+    def update():
+        canvas.delete('all')
+
+        for mlcl in molecules:
+            mlcl.move()
+            mlcl.bounce_from_edge()
+
+        check_collisions(molecules)
+
+        for molec in molecules:
+            molec.draw()
+
+        canvas.after(5, update)
+
+    update()
+
+    window = tk.Tk()
+    canvas.pack()
+    window.mainloop()
+
+
+if __name__ == '__main__':
+    main()
