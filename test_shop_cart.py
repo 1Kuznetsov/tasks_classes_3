@@ -10,6 +10,7 @@ while True:
     print('3. View total price')
     print('4. Save data to file')
     print('5. Exit')
+    print()
 
     choice = input('Enter your choice: ')
 
