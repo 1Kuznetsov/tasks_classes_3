@@ -88,3 +88,20 @@ class Molecule:
             self.y += self.speedy
             other.x += other.speedx
             other.y += other.speedy
+
+
+def check_collisions(molecules):
+    """
+    Function of checking collisions betwixt molecules
+    :param molecules:
+    :return:
+    """
+
+    for i in range(len(molecules)):
+        for j in range(i + 1, len(molecules)):
+            dx = molecules[i].x - molecules[j].x
+            dy = molecules[i].y - molecules[j].y
+            distance = math.sqrt(dx ** 2 + dy ** 2)
+
+            if distance < molecules[i].size / 2 + molecules[j].size / 2:
+                molecules[i].bounce_from_molecule(molecules[j])
